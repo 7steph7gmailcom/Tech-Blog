@@ -50,7 +50,7 @@ router.post("/login", async (req, res) => {
           username: req.body.username,
         },
       });
-  //checks against other users and emails for redundancies in bcrypt
+//checks against other users and emails for redundancies in bcrypt
       if (!dbUserData) {
         res
           .status(400)
@@ -68,7 +68,6 @@ const validPassword = await dbUserData.checkPassword(req.body.password);
     }
 
 
-
 //Compilies Users
 router.get("/", async (req, res) => {
     try {
@@ -81,3 +80,42 @@ router.get("/", async (req, res) => {
       res.status(500).json(err);
     }
   });
+
+
+const userObject = {
+    username: dbUserData.username,
+    id: dbUserData.id,
+    first_name: dbUserData.first_name,
+    last_name: dbUserData.last_name,
+    email: dbUserData.email,
+  };
+
+console.log(userObject);
+    req.session.save(() => {
+    req.session.loggedIn = true;
+    req.session.username = userObject;
+    console.log(req.session.loggedIn);
+    console.log("You have sucessfully logged in");
+    res.status(200).json({ message: "You are now logged in" });
+});
+    // console.log(req.session)
+} catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+
+//Logs user out
+router.post("/logout", (req, res) => {
+    console.log(req.session);
+    if (req.session.loggedIn) {
+        req.session.destroy(() => {
+          console.log("You are now logged out");
+          res.status(200).send("You are logged out");
+        });
+    } else {
+        res.status(204).end();
+        console.log("You are now logged out!");
+      }
+    });
+     module.exports = router
